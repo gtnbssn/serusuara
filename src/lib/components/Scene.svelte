@@ -56,6 +56,8 @@
     <Collider shape="cuboid" args={[1, 10, 10]} restitution={1} />
   </T.Group>
 
+  <T.DirectionalLight />
+
   <Key position={[-6, -3, 0]} pitch={1} />
   <Key position={[-4, -3, 0]} pitch={2} />
   <Key position={[-2, -3, 0]} pitch={3} />
