@@ -1,24 +1,13 @@
 <script lang="ts">
-  import { T, useThrelteUserContext } from "@threlte/core";
+  import { T } from "@threlte/core";
   import { Audio } from "@threlte/extras";
-  import {
-    AutoColliders,
-    Collider,
-    RigidBody,
-    useJoint,
-  } from "@threlte/rapier";
+  import { AutoColliders, RigidBody } from "@threlte/rapier";
   import { velocityMonitor } from "$lib/stores";
 
   export let position = [0, 0, 0];
   export let pitch: 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
-  let playSoftest: (delay?: number) => Promise<Audio>;
-  let playSoft: (delay?: number) => Promise<Audio>;
-  let playMedium: (delay?: number) => Promise<Audio>;
-  let playHarder: (delay?: number) => Promise<Audio>;
-  let playHardest: (delay?: number) => Promise<Audio>;
   let stop: () => Audio;
-  let velocity: "softest" | "soft" | "medium" | "harder" | "hardest";
   let softestAudioComponent;
   let softAudioCompomnent;
   let mediumAudioComponent;
@@ -37,15 +26,12 @@
       restitution={1}
       shape="cuboid"
       oncollisionenter={() => {
-        console.log("collisionEnter");
         stop();
       }}
       oncontact={(e) => {
-        console.log(e.totalForce.y);
         F = Math.abs(e.totalForce.y);
       }}
       oncollisionexit={() => {
-        console.log("collisionExit");
         if (F > 800000) {
           hardestAudioComponent.play();
           $velocityMonitor = "hardest";

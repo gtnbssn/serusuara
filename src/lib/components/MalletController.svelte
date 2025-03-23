@@ -32,7 +32,6 @@
   const settings = stream.getVideoTracks()[0].getSettings();
   video.height = settings.height as number;
   video.width = settings.width as number;
-  console.log(settings);
 
   video.style.position = "absolute";
   video.style.top = "0";
@@ -52,7 +51,7 @@
 </script>
 
 <script lang="ts">
-  import { T, useStage, useTask, useThrelte } from "@threlte/core";
+  import { T, useThrelte } from "@threlte/core";
   import { Vector3 } from "three";
   import { AutoColliders, RigidBody } from "@threlte/rapier";
   import { Tween } from "svelte/motion";
@@ -75,7 +74,6 @@
   const predictHands = async () => {
     // Now let's start detecting the stream.
     let results;
-    // console.log(results);
     let startTimeMs = performance.now();
     if (lastVideoTime !== video.currentTime) {
       lastVideoTime = video.currentTime;
@@ -97,7 +95,7 @@
     }
   };
 
-  const { size, renderStage } = useThrelte();
+  const { size } = useThrelte();
   let aspectRatio = $size.width / $size.height;
 
   const videoFrameCallback = () => {
@@ -153,7 +151,6 @@
     shape="ball"
     mass={200}
     oncontact={(e) => {
-      // console.log(e);
       $totalForceMagnitude = e.totalForceMagnitude;
     }}
   >
