@@ -19,6 +19,11 @@
   let playHardest: (delay?: number) => Promise<Audio>;
   let stop: () => Audio;
   let velocity: "softest" | "soft" | "medium" | "harder" | "hardest";
+  let softestAudioComponent;
+  let softAudioCompomnent;
+  let mediumAudioComponent;
+  let harderAudioComponent;
+  let hardestAudioComponent;
   let F: number;
 </script>
 
@@ -31,37 +36,37 @@
     <AutoColliders
       restitution={1}
       shape="cuboid"
-      on:collisionenter={() => {
+      oncollisionenter={() => {
         console.log("collisionEnter");
         stop();
       }}
-      on:contact={(e) => {
+      oncontact={(e) => {
         console.log(e.totalForce.y);
         F = Math.abs(e.totalForce.y);
       }}
-      on:collisionexit={() => {
+      oncollisionexit={() => {
         console.log("collisionExit");
         if (F > 800000) {
-          playHardest();
+          hardestAudioComponent.play();
           $velocityMonitor = "hardest";
         } else if (F > 650000) {
-          playHarder();
+          harderAudioComponent.play();
           $velocityMonitor = "harder";
         } else if (F > 400000) {
-          playMedium();
+          mediumAudioComponent.play();
           $velocityMonitor = "medium";
         } else if (F > 100000) {
-          playSoft();
+          softAudioCompomnent.play();
           $velocityMonitor = "soft";
         } else {
-          playSoftest();
+          softestAudioComponent.play();
           $velocityMonitor = "softest";
         }
       }}
     >
       <T.Mesh scale={[1, 0.1, 3]}>
         <T.BoxGeometry />
-        <T.MeshStandardMaterial color="#efaf0d" roughness="0.5" metalness="1" />
+        <T.MeshStandardMaterial color="#efaf0d" roughness={0.5} metalness={1} />
       </T.Mesh>
     </AutoColliders>
   </RigidBody>
@@ -69,22 +74,21 @@
 
 <Audio
   src={`/sounds/saron-${pitch}-softest.wav`}
-  bind:play={playSoftest}
-  bind:stop
+  bind:this={softestAudioComponent}
 />
-<Audio src={`/sounds/saron-${pitch}-soft.wav`} bind:play={playSoft} bind:stop />
+<Audio
+  src={`/sounds/saron-${pitch}-soft.wav`}
+  bind:this={softAudioCompomnent}
+/>
 <Audio
   src={`/sounds/saron-${pitch}-medium.wav`}
-  bind:play={playMedium}
-  bind:stop
+  bind:this={mediumAudioComponent}
 />
 <Audio
   src={`/sounds/saron-${pitch}-harder.wav`}
-  bind:play={playHarder}
-  bind:stop
+  bind:this={harderAudioComponent}
 />
 <Audio
   src={`/sounds/saron-${pitch}-hardest.wav`}
-  bind:play={playHardest}
-  bind:stop
+  bind:this={hardestAudioComponent}
 />
