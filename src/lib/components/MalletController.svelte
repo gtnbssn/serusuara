@@ -27,10 +27,26 @@
   let video = document.createElement("video");
 
   video.srcObject = stream;
+  video.autoplay = true;
+  video.playsInline = true;
   const settings = stream.getVideoTracks()[0].getSettings();
   video.height = settings.height as number;
   video.width = settings.width as number;
-  console.log(video);
+  console.log(settings);
+
+  video.style.position = "absolute";
+  video.style.top = "0";
+  video.style.opacity = "0.2";
+  video.style.transform = "scaleX(-1)";
+  video.style.width = "100%";
+  video.style.height = "100%";
+  video.style.pointerEvents = "none";
+
+  let videoHasLoaded = false;
+  video.addEventListener("loadeddata", () => {
+    videoHasLoaded = true;
+  });
+  document.body.insertBefore(video, null);
 
   let lastVideoTime = -1;
 </script>
@@ -56,13 +72,10 @@
     easing: expoIn,
   });
 
-  let videoHasLoaded = false;
-  video.addEventListener("loadeddata", () => (videoHasLoaded = true));
-
   const predictHands = async () => {
     // Now let's start detecting the stream.
     let results;
-    console.log(results);
+    // console.log(results);
     let startTimeMs = performance.now();
     if (lastVideoTime !== video.currentTime) {
       lastVideoTime = video.currentTime;
@@ -87,44 +100,33 @@
   const { size, renderStage } = useThrelte();
   let aspectRatio = $size.width / $size.height;
 
-  const beforeRenderStage = useStage("beforeRenderStage", {
-    before: renderStage,
-  });
-
-  const { task: setHandPosition } = useTask(
-    "set-hand-position",
-    () => {
-      if (videoHasLoaded) predictHands();
-      handBody?.setTranslation(
-        {
-          x: (rightWristPosition.current.x - 0.5) * 20 * aspectRatio,
-          y: (rightWristPosition.current.y - 0.5) * -20,
-          z: 0,
-        },
-        true,
-      );
-    },
-    { stage: beforeRenderStage },
-  );
-  const {} = useTask(
-    () => {
-      if (attached) {
-        const xdiff = handBody.translation().x - malletBody.translation().x;
-        const ydiff = handBody.translation().y - malletBody.translation().y;
-        const vectorDiff = new Vector3(xdiff * 15, ydiff * 15, 0);
-        malletBody.setLinvel(vectorDiff, true);
-      } else if (
-        Math.sqrt(
-          (handBody.translation().x - malletBody.translation().x) ** 2 +
-            (handBody.translation().y - malletBody.translation().y) ** 2,
-        ) < attachmentThreshold.current
-      ) {
-        attached = true;
-        attachmentThreshold.set(0, { delay: 0, duration: 0 });
-      }
-    },
-    { after: setHandPosition },
-  );
+  const videoFrameCallback = () => {
+    if (videoHasLoaded) predictHands();
+    handBody?.setTranslation(
+      {
+        x: (rightWristPosition.current.x - 0.5) * 20 * aspectRatio,
+        y: (rightWristPosition.current.y - 0.5) * -20,
+        z: 0,
+      },
+      true,
+    );
+    if (attached) {
+      const xdiff = handBody.translation().x - malletBody.translation().x;
+      const ydiff = handBody.translation().y - malletBody.translation().y;
+      const vectorDiff = new Vector3(xdiff * 15, ydiff * 15, 0);
+      malletBody.setLinvel(vectorDiff, true);
+    } else if (
+      Math.sqrt(
+        (handBody.translation().x - malletBody.translation().x) ** 2 +
+          (handBody.translation().y - malletBody.translation().y) ** 2,
+      ) < attachmentThreshold.current
+    ) {
+      attached = true;
+      attachmentThreshold.set(0, { delay: 0, duration: 0 });
+    }
+    video.requestVideoFrameCallback(videoFrameCallback);
+  };
+  video.requestVideoFrameCallback(videoFrameCallback);
 </script>
 
 <RigidBody bind:rigidBody={handBody}>
